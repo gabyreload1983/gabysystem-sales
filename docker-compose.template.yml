@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  gabysystem-sales:
+    build: .
+    image: gabyreload1983/gabysystem-sales:vx.x.x
+    container_name: gabysystem-sales-vx.x.x
+    ports:
+      - "8080:80"
+    restart: always
+    volumes:
+      - ./dist:/usr/share/nginx/html/sales
