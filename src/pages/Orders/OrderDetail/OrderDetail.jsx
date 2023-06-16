@@ -42,7 +42,7 @@ export default function OrderDetail() {
     }
 
     if (response.status === "success") {
-      const { order } = response;
+      const order = response.payload;
       setOrder(order);
       setDiagnosis(order.diagnostico);
       setPrice(Number(order.costo));
@@ -194,6 +194,7 @@ export default function OrderDetail() {
                           readOnly
                           className="form-control"
                           rows="5"
+                          disabled
                         ></textarea>
                       </div>
                     </td>

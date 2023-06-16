@@ -14,7 +14,7 @@ export default function Pending() {
     const response = await getFromApi(
       `http://${import.meta.env.VITE_URL_HOST}/api/orders/pending/${sector}`
     );
-    if (response) setPendings(response);
+    if (response.status === "success") setPendings(response.payload);
   };
 
   useEffect(() => {
