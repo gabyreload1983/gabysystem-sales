@@ -15,6 +15,7 @@ import PageNotFount from "./components/PageNotFount";
 import Users from "./pages/Users/Users";
 import UserDetail from "./pages/Users/UserDetail";
 import ToDeliver from "./pages/Orders/ToDeliver";
+import FinalDisposition from "./pages/Orders/FinalDisposition";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="pending/:sector" element={<Pending />} />
               <Route path="in-process" element={<InProcess />} />
               <Route path="to-deliver" element={<ToDeliver />} />
+              <Route path="final-disposition" element={<FinalDisposition />} />
               <Route path=":id" element={<OrderDetail />} />
             </Route>
 

@@ -27,6 +27,9 @@ export default function OrdersLayout() {
               <Nav.Link as={NavLink} to="/orders/to-deliver">
                 Ordenes Para Entregar
               </Nav.Link>
+              <Nav.Link as={NavLink} to="/orders/final-disposition">
+                Disposicion Final
+              </Nav.Link>
             </Nav>
             <SearchOrder />
           </Navbar.Collapse>
