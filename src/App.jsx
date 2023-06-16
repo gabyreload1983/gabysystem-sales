@@ -14,6 +14,7 @@ import OrderDetail from "./pages/Orders/OrderDetail/OrderDetail";
 import PageNotFount from "./components/PageNotFount";
 import Users from "./pages/Users/Users";
 import UserDetail from "./pages/Users/UserDetail";
+import ToDeliver from "./pages/Orders/ToDeliver";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="orders" element={<OrdersLayout />}>
               <Route path="pending/:sector" element={<Pending />} />
               <Route path="in-process" element={<InProcess />} />
+              <Route path="to-deliver" element={<ToDeliver />} />
               <Route path=":id" element={<OrderDetail />} />
             </Route>
 
