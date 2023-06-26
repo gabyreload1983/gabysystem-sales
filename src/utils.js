@@ -36,10 +36,12 @@ export const postToApi = async (path, body) => {
 export const formatPrice = (price) => {
   let p = price.toLocaleString("en-US");
   let index = p.indexOf(".");
-  return p.slice(0, index).replace(",", ".");
+  return index === -1
+    ? p.replaceAll(",", ".")
+    : p.slice(0, index).replaceAll(",", ".");
 };
 
-export const getFinalPrice = (lista, grabado, dollar) => {
-  if (grabado == 1) return Number(lista) * 1.21 * Number(dollar);
-  if (grabado == 3) return Number(lista) * 1.105 * Number(dollar);
-};
+export const getTotalOrder = (order) =>
+  order.products.reduce((acc, val) => {
+    return (acc += Number(val.priceList1WithTax));
+  }, Number(order.costo));

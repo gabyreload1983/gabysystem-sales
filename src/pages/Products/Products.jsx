@@ -4,10 +4,10 @@ import SearchProduct from "../../components/SearchProduct";
 import ProductsList from "./ProductsList";
 
 export default function Products() {
-  const [data, setData] = useState({ products: [], dollar: "" });
+  const [products, setProducts] = useState([]);
 
-  const handleChangeProducts = (data) => {
-    setData(data);
+  const handleChangeProducts = (products) => {
+    setProducts(products);
   };
 
   return (
@@ -17,7 +17,7 @@ export default function Products() {
           <SearchProduct onChangeProducts={handleChangeProducts} />
         </Col>
         <Col xs={12}>
-          <ProductsList data={data} />
+          <ProductsList products={products} />
         </Col>
       </Row>
     </Container>
