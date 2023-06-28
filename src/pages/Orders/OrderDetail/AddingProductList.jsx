@@ -1,13 +1,14 @@
 import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import ProductDetail from "./ProductDetail";
+import ProductDetail from "../../Products/ProductDetail";
 
-export default function ProductsList({ products }) {
+export default function AddingProductList({ products, onAddingProduct }) {
+  const styleProductItem = { cursor: "pointer" };
+
   return (
     <Container>
       <Row>
         <Col>
-          <h1>Lista de Productos</h1>
           <table className="table">
             <thead>
               <tr>
@@ -20,7 +21,11 @@ export default function ProductsList({ products }) {
             <tbody>
               {products.length > 0 &&
                 products.map((product) => (
-                  <tr key={product.codigo}>
+                  <tr
+                    key={product.codigo}
+                    onClick={() => onAddingProduct(product)}
+                    style={styleProductItem}
+                  >
                     <ProductDetail product={product} />
                   </tr>
                 ))}

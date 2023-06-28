@@ -1,18 +1,28 @@
 import React, { useState } from "react";
 import { getFromApi } from "./../utils";
+import Swal from "sweetalert2";
 
 export default function SearchProduct({ onChangeProducts }) {
-  const [input, setInput] = useState([]);
+  const [input, setInput] = useState(null);
   const [searchBy, setSearchBy] = useState("description");
 
   const searchProduct = async () => {
+    if (!input)
+      return Swal.fire({
+        text: `Ingrese al menos 3 caracteres`,
+        icon: "error",
+      });
+    if (searchBy === "ean" && input.split("").length !== 13)
+      return Swal.fire({
+        text: `Ingrese un codigo de 13 numeros`,
+        icon: "error",
+      });
     const response = await getFromApi(
       `http://${
         import.meta.env.VITE_URL_HOST
       }/api/products/search-by?${searchBy}=${input}`
     );
-    console.log(response);
-    onChangeProducts(response.payload);
+    onChangeProducts(response.products);
   };
 
   const handleSearchChange = (event) => {

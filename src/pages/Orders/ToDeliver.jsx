@@ -3,14 +3,14 @@ import { Container } from "react-bootstrap";
 import OrderList from "./OrderList";
 import { getFromApi } from "../../utils";
 
-export default function InProcess() {
-  const [inProcess, setInProcess] = useState([]);
+export default function ToDeliver() {
+  const [toDeliver, setToDeliver] = useState([]);
 
   const getOrders = async () => {
     const response = await getFromApi(
-      `http://${import.meta.env.VITE_URL_HOST}/api/orders/in-process`
+      `http://${import.meta.env.VITE_URL_HOST}/api/orders/to-deliver`
     );
-    if (response.status === "success") setInProcess(response.payload);
+    if (response.status === "success") setToDeliver(response.payload);
   };
 
   useEffect(() => {
@@ -20,9 +20,9 @@ export default function InProcess() {
   return (
     <Container>
       <h3 className="text-center mt-3">
-        <span className="badge bg-info">TOTAL {inProcess.length}</span>
+        <span className="badge bg-info">TOTAL {toDeliver.length}</span>
       </h3>
-      {inProcess.length > 0 && <OrderList orders={inProcess} />}
+      {toDeliver.length > 0 && <OrderList orders={toDeliver} />}
     </Container>
   );
 }

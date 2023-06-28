@@ -5,7 +5,7 @@ import ProductsInOrder from "./ProductsInOrder";
 import { UserContext } from "../../../context/userContext";
 import { useNavigate } from "react-router-dom";
 import Table from "react-bootstrap/Table";
-import { getFromApi, putToApi } from "../../../utils";
+import { getFromApi, getTotalOrder } from "../../../utils";
 import Swal from "sweetalert2";
 import {
   getOrderDiagnosis,
@@ -15,14 +15,12 @@ import {
   getOrderUbication,
 } from "../orderUtils";
 import moment from "moment/moment";
+import AddingProduct from "./AddingProduct";
 
 export default function OrderDetail() {
   const { user } = useContext(UserContext);
   const { id } = useParams();
   const [order, setOrder] = useState(null);
-  const [diagnosis, setDiagnosis] = useState(null);
-  const [price, setPrice] = useState(null);
-  const [total, setTotal] = useState(0);
 
   const navigate = useNavigate();
 
@@ -42,12 +40,64 @@ export default function OrderDetail() {
     }
 
     if (response.status === "success") {
-      const { order } = response;
+      const order = response.payload;
       setOrder(order);
-      setDiagnosis(order.diagnostico);
-      setPrice(Number(order.costo));
-      setTotal(Number(order.total));
     }
+  };
+
+  const handleAddingProduct = (product) => {
+    order.products.push(product);
+    order.total = getTotalOrder(order);
+
+    setOrder((prev) => ({
+      ...prev,
+      products: order.products,
+      total: order.total,
+    }));
+  };
+
+  const handleDeletingProduct = (product) => {
+    const index = order.products.findIndex((p) => p.codigo === product.codigo);
+    order.products.splice(index, 1);
+    order.total = getTotalOrder(order);
+
+    setOrder((prev) => ({
+      ...prev,
+      products: order.products,
+      total: order.total,
+    }));
+  };
+
+  const handlePrint = async () => {
+    await Swal.fire({
+      toast: true,
+      icon: "success",
+      text: `Falta Implementacion`,
+      position: "top-end",
+      timer: 3000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
+  };
+
+  const handleConfirm = async () => {
+    await Swal.fire({
+      toast: true,
+      icon: "success",
+      text: `Falta Implementacion`,
+      position: "top-end",
+      timer: 3000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+      },
+    });
   };
 
   const outOrder = async (id) => {
@@ -63,35 +113,6 @@ export default function OrderDetail() {
         showCancelButton: true,
         confirmButtonText: "Aceptar",
       });
-      const data = await putToApi(
-        `http://${import.meta.env.VITE_URL_HOST}/api/orders/out`,
-        {
-          nrocompro: `${order.nrocompro}`,
-          code_technical: `${user.code_technical}`,
-        }
-      );
-      if (data.status === "error")
-        return Swal.fire({
-          text: `${data.message}`,
-          icon: "error",
-        });
-      if (data.status === "success") {
-        await getOrder();
-
-        await Swal.fire({
-          toast: true,
-          icon: "success",
-          text: `Se dio salida a la orden ${order.nrocompro}`,
-          position: "top-end",
-          timer: 3000,
-          showConfirmButton: false,
-          timerProgressBar: true,
-          didOpen: (toast) => {
-            toast.addEventListener("mouseenter", Swal.stopTimer);
-            toast.addEventListener("mouseleave", Swal.resumeTimer);
-          },
-        });
-      }
     } catch (error) {
       Swal.fire({
         text: `${error.message}`,
@@ -190,10 +211,11 @@ export default function OrderDetail() {
                       <div className="mb-3">
                         <label className="form-label">Diagnostico</label>
                         <textarea
-                          value={diagnosis}
+                          value={order.diagnostico}
                           readOnly
                           className="form-control"
-                          rows="5"
+                          rows="3"
+                          disabled
                         ></textarea>
                       </div>
                     </td>
@@ -205,8 +227,38 @@ export default function OrderDetail() {
           <Row>
             <Col xs={12}>
               <h3>DETALLE</h3>
-              <ProductsInOrder order={order} total={total} price={price} />
+              <ProductsInOrder
+                products={order.products}
+                price={order.costo}
+                total={order.total}
+                onDeletingProduct={handleDeletingProduct}
+              />
             </Col>
+            {order.estado === 22 && (
+              <Col xs={12} className="d-flex justify-content-between mb-3">
+                <button
+                  className="btn btn-sm btn-outline-warning"
+                  onClick={handlePrint}
+                >
+                  Imprimir
+                </button>
+                <div className="btn-group">
+                  <button
+                    className="btn btn-sm btn-outline-success"
+                    onClick={handleConfirm}
+                  >
+                    Confirmar
+                  </button>
+
+                  <button
+                    className="btn btn-sm btn-outline-danger"
+                    onClick={getOrder}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </Col>
+            )}
           </Row>
           <Row>
             <Col className="text-end">
@@ -217,6 +269,13 @@ export default function OrderDetail() {
                 >
                   Salida
                 </Button>
+              )}
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              {order.estado === 22 && (
+                <AddingProduct onAddingProduct={handleAddingProduct} />
               )}
             </Col>
           </Row>
