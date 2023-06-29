@@ -7,6 +7,7 @@ export default function ProductsInOrder({
   price,
   total,
   onDeletingProduct,
+  state,
 }) {
   return (
     <Table striped bordered hover>
@@ -35,14 +36,18 @@ export default function ProductsInOrder({
                 <td className="custom-td text-end">
                   ${formatPrice(product.priceList1WithTax)}
                 </td>
-                <td className="d-flex justify-content-center align-items-center">
-                  <button
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={() => onDeletingProduct(product)}
-                  >
-                    X
-                  </button>
-                </td>
+                {state === 22 ? (
+                  <td className="d-flex justify-content-center align-items-center">
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => onDeletingProduct(product)}
+                    >
+                      X
+                    </button>
+                  </td>
+                ) : (
+                  <td></td>
+                )}
               </tr>
             );
           })}

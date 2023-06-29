@@ -262,6 +262,7 @@ export default function OrderDetail() {
                 price={order.costo}
                 total={order.total}
                 onDeletingProduct={handleDeletingProduct}
+                state={order.estado}
               />
             </Col>
             {order.estado === 22 && (
