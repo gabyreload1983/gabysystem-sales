@@ -5,7 +5,7 @@ import ProductsInOrder from "./ProductsInOrder";
 import { UserContext } from "../../../context/userContext";
 import { useNavigate } from "react-router-dom";
 import Table from "react-bootstrap/Table";
-import { getFromApi, getTotalOrder, putToApi } from "../../../utils";
+import { SwalError, getFromApi, getTotalOrder, putToApi } from "../../../utils";
 import Swal from "sweetalert2";
 import {
   getOrderDiagnosis,
@@ -18,7 +18,7 @@ import moment from "moment/moment";
 import AddingProduct from "./AddingProduct";
 
 export default function OrderDetail() {
-  const { user } = useContext(UserContext);
+  const { user, logoutUserContext } = useContext(UserContext);
   const { id } = useParams();
   const [order, setOrder] = useState(null);
 
@@ -33,15 +33,14 @@ export default function OrderDetail() {
       `http://${import.meta.env.VITE_URL_HOST}/api/orders/${id}`
     );
     if (response.status === "error") {
-      Swal.fire({
-        text: `${response.message}`,
-        icon: "error",
-      });
+      await SwalError(response);
+      logoutUserContext();
+      return navigate("/login");
     }
 
     if (response.status === "success") {
       const order = response.payload;
-      setOrder(order);
+      return setOrder(order);
     }
   };
 
