@@ -1,16 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
 import OrderList from "./OrderList";
-import { getFromApi } from "../../utils";
+import { SwalError, getFromApi } from "../../utils";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/userContext";
 
 export default function ToDeliver() {
   const [toDeliver, setToDeliver] = useState([]);
+  const navigate = useNavigate();
+  const { logoutUserContext } = useContext(UserContext);
 
   const getOrders = async () => {
     const response = await getFromApi(
       `http://${import.meta.env.VITE_URL_HOST}/api/orders/to-deliver`
     );
-    if (response.status === "success") setToDeliver(response.payload);
+
+    if (response.status === "error") {
+      await SwalError(response);
+      logoutUserContext();
+      return navigate("/login");
+    }
+    if (response.status === "success") return setToDeliver(response.payload);
   };
 
   useEffect(() => {

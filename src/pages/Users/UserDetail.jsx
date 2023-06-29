@@ -1,20 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getFromApi, putToApi } from "../../utils";
+import React, { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { SwalError, getFromApi, putToApi } from "../../utils";
 import { Col, Container, Row } from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Swal from "sweetalert2";
+import { UserContext } from "../../context/userContext";
 
 export default function UserDetail() {
   const { id } = useParams();
   const [updateUser, setUpdateUser] = useState(null);
+  const navigate = useNavigate();
+  const { logoutUserContext } = useContext(UserContext);
 
   const getUser = async () => {
     const response = await getFromApi(
       `http://${import.meta.env.VITE_URL_HOST}/api/users/${id}`
     );
-    if (response.status === "success") setUpdateUser(response.user);
+
+    if (response.status === "error") {
+      await SwalError(response);
+      logoutUserContext();
+      return navigate("/login");
+    }
+
+    if (response.status === "success") return setUpdateUser(response.user);
   };
   useEffect(() => {
     getUser();

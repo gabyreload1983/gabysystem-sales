@@ -1,3 +1,5 @@
+import Swal from "sweetalert2";
+
 export const getFromApi = async (path) => {
   const response = await fetch(path, {
     method: "GET",
@@ -45,3 +47,10 @@ export const getTotalOrder = (order) =>
   order.products.reduce((acc, val) => {
     return (acc += Number(val.priceList1WithTax));
   }, Number(order.costo));
+
+export const SwalError = async (error) => {
+  return Swal.fire({
+    text: `${error.message}`,
+    icon: "error",
+  });
+};
