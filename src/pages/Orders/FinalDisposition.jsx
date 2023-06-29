@@ -20,7 +20,7 @@ export default function FinalDisposition() {
       return navigate("/login");
     }
     if (response.status === "success")
-      return setFinalDisposition(response.products);
+      return setFinalDisposition(response.payload);
   };
 
   useEffect(() => {
