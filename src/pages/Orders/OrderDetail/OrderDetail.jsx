@@ -5,7 +5,7 @@ import ProductsInOrder from "./ProductsInOrder";
 import { UserContext } from "../../../context/userContext";
 import { useNavigate } from "react-router-dom";
 import Table from "react-bootstrap/Table";
-import { getFromApi, getTotalOrder } from "../../../utils";
+import { getFromApi, getTotalOrder, putToApi } from "../../../utils";
 import Swal from "sweetalert2";
 import {
   getOrderDiagnosis,
@@ -102,17 +102,47 @@ export default function OrderDetail() {
 
   const outOrder = async (id) => {
     try {
-      const response = await Swal.fire({
+      const question = await Swal.fire({
         text: `Queres dar salida a la orden ${order.nrocompro}?`,
         showCancelButton: true,
         confirmButtonText: "Aceptar",
       });
-      if (!response.isConfirmed) return;
-      return await Swal.fire({
-        text: `Falta implementacion`,
-        showCancelButton: true,
-        confirmButtonText: "Aceptar",
-      });
+      if (!question.isConfirmed) return;
+
+      const response = await putToApi(
+        `http://${import.meta.env.VITE_URL_HOST}/api/orders/out/${id}`
+      );
+      if (response.status === "success") {
+        getOrder();
+        await Swal.fire({
+          toast: true,
+          icon: "success",
+          text: `Salida de orden exitosa!`,
+          position: "top-end",
+          timer: 3000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+      }
+      if (response.status === "error") {
+        await Swal.fire({
+          toast: true,
+          icon: "error",
+          text: `${response.message}`,
+          position: "top-end",
+          timer: 3000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+      }
     } catch (error) {
       Swal.fire({
         text: `${error.message}`,
