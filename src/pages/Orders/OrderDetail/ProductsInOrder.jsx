@@ -15,6 +15,7 @@ export default function ProductsInOrder({
         <tr>
           <th>Codigo</th>
           <th>Descripcion</th>
+          <th>Serie</th>
           <th>Precio</th>
           <th></th>
         </tr>
@@ -23,6 +24,7 @@ export default function ProductsInOrder({
         <tr>
           <td>.ST</td>
           <td>Mano de Obra</td>
+          <td></td>
           <td className="custom-td text-end">${formatPrice(price)}</td>
           <td></td>
         </tr>
@@ -32,7 +34,7 @@ export default function ProductsInOrder({
               <tr key={`${product.nrocompro}-${index}`}>
                 <td>{product.codigo}</td>
                 <td>{product.descrip}</td>
-
+                <td>{product.serie}</td>
                 <td className="custom-td text-end">
                   ${formatPrice(product.priceList1WithTax)}
                 </td>
@@ -54,7 +56,7 @@ export default function ProductsInOrder({
       </tbody>
       <tfoot>
         <tr>
-          <td colSpan={2}>Total</td>
+          <td colSpan={3}>Total</td>
           <td className="custom-td text-end">${formatPrice(total)}</td>
           <td></td>
         </tr>

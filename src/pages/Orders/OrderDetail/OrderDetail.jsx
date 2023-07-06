@@ -44,7 +44,22 @@ export default function OrderDetail() {
     }
   };
 
-  const handleAddingProduct = (product) => {
+  const handleAddingProduct = async (product) => {
+    let serie = "";
+    if (product.trabaserie === "S") {
+      const { value } = await Swal.fire({
+        input: "text",
+        inputLabel: "Ingrese Nº Serie",
+        inputPlaceholder: "Numero de Serie",
+        showCancelButton: true,
+      });
+
+      if (!value) {
+        return;
+      }
+      serie = value;
+    }
+    product.serie = serie;
     order.products.push(product);
     order.total = getTotalOrder(order);
 
@@ -84,19 +99,55 @@ export default function OrderDetail() {
   };
 
   const handleConfirm = async () => {
-    await Swal.fire({
-      toast: true,
-      icon: "success",
-      text: `Falta Implementacion`,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener("mouseenter", Swal.stopTimer);
-        toast.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    });
+    try {
+      const question = await Swal.fire({
+        text: `Guardar cambios en orden ${order.nrocompro}?`,
+        showCancelButton: true,
+        confirmButtonText: "Aceptar",
+      });
+      if (!question.isConfirmed) return;
+      const response = await putToApi(
+        `http://${import.meta.env.VITE_URL_HOST}/api/orders/products`,
+        order
+      );
+      if (response.status === "success") {
+        console.log("payload", response.payload);
+        getOrder();
+        await Swal.fire({
+          toast: true,
+          icon: "success",
+          text: `Cambios guardados con exito!`,
+          position: "top-end",
+          timer: 3000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+      }
+      if (response.status === "error") {
+        await Swal.fire({
+          toast: true,
+          icon: "error",
+          text: `${response.message}`,
+          position: "top-end",
+          timer: 3000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        text: `${error.message}`,
+        icon: "error",
+      });
+    }
   };
 
   const outOrder = async (id) => {
