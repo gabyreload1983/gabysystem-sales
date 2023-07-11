@@ -106,10 +106,22 @@ export default function OrderDetail() {
         confirmButtonText: "Aceptar",
       });
       if (!question.isConfirmed) return;
+      Swal.fire({
+        title: "Wait...",
+        html: "<strong>Actualizando orden y enviando email</strong>",
+        timerProgressBar: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
       const response = await putToApi(
         `http://${import.meta.env.VITE_URL_HOST}/api/orders/products`,
         order
       );
+
       if (response.status === "success") {
         console.log("payload", response.payload);
         getOrder();
