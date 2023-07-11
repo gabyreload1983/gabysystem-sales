@@ -86,8 +86,8 @@ export default function OrderDetail() {
       total: order.total,
     }));
 
-    setCancelButton(order.products.length === 0 ? true : false);
-    setConfirmButton(order.products.length === 0 ? true : false);
+    setCancelButton(false);
+    setConfirmButton(false);
   };
 
   const handlePrint = async () => {
