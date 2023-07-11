@@ -21,6 +21,8 @@ export default function OrderDetail() {
   const { user, logoutUserContext } = useContext(UserContext);
   const { id } = useParams();
   const [order, setOrder] = useState(null);
+  const [cancelButton, setCancelButton] = useState(true);
+  const [confirmButton, setConfirmButton] = useState(true);
 
   const navigate = useNavigate();
 
@@ -68,6 +70,9 @@ export default function OrderDetail() {
       products: order.products,
       total: order.total,
     }));
+
+    setCancelButton(false);
+    setConfirmButton(false);
   };
 
   const handleDeletingProduct = (product) => {
@@ -80,6 +85,9 @@ export default function OrderDetail() {
       products: order.products,
       total: order.total,
     }));
+
+    setCancelButton(order.products.length === 0 ? true : false);
+    setConfirmButton(order.products.length === 0 ? true : false);
   };
 
   const handlePrint = async () => {
@@ -123,21 +131,25 @@ export default function OrderDetail() {
       );
 
       if (response.status === "success") {
-        console.log("payload", response.payload);
         getOrder();
         await Swal.fire({
           toast: true,
           icon: "success",
           text: `Cambios guardados con exito!`,
-          position: "top-end",
-          timer: 3000,
-          showConfirmButton: false,
+          position: "center",
+          showConfirmButton: true,
           timerProgressBar: true,
           didOpen: (toast) => {
             toast.addEventListener("mouseenter", Swal.stopTimer);
             toast.addEventListener("mouseleave", Swal.resumeTimer);
           },
         });
+        window.open(
+          `http://${import.meta.env.VITE_URL_HOST}/pdfHistory/${
+            response.payload.fileName
+          }`,
+          "_blank"
+        );
       }
       if (response.status === "error") {
         await Swal.fire({
@@ -154,6 +166,26 @@ export default function OrderDetail() {
           },
         });
       }
+    } catch (error) {
+      Swal.fire({
+        text: `${error.message}`,
+        icon: "error",
+      });
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      const question = await Swal.fire({
+        text: `Cancelar cambios en orden ${order.nrocompro}?`,
+        showCancelButton: true,
+        confirmButtonText: "Aceptar",
+      });
+      if (!question.isConfirmed) return;
+
+      getOrder();
+      setCancelButton(true);
+      setConfirmButton(true);
     } catch (error) {
       Swal.fire({
         text: `${error.message}`,
@@ -339,13 +371,15 @@ export default function OrderDetail() {
                   <button
                     className="btn btn-sm btn-outline-success"
                     onClick={handleConfirm}
+                    disabled={confirmButton}
                   >
                     Confirmar
                   </button>
 
                   <button
                     className="btn btn-sm btn-outline-danger"
-                    onClick={getOrder}
+                    onClick={handleCancel}
+                    disabled={cancelButton}
                   >
                     Cancelar
                   </button>
