@@ -132,18 +132,34 @@ export default function OrderDetail() {
 
       if (response.status === "success") {
         getOrder();
+        if (!order.products.length) {
+          return await Swal.fire({
+            toast: true,
+            icon: "success",
+            text: `Cambios guardados con exito! Orden sin productos`,
+            position: "center",
+            showConfirmButton: true,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.addEventListener("mouseenter", Swal.stopTimer);
+              toast.addEventListener("mouseleave", Swal.resumeTimer);
+            },
+          });
+        }
+
         await Swal.fire({
           toast: true,
           icon: "success",
           text: `Cambios guardados con exito!`,
           position: "center",
           showConfirmButton: true,
-          timerProgressBar: true,
+          confirmButtonText: "Abrir PDF",
           didOpen: (toast) => {
             toast.addEventListener("mouseenter", Swal.stopTimer);
             toast.addEventListener("mouseleave", Swal.resumeTimer);
           },
         });
+
         window.open(
           `http://${import.meta.env.VITE_URL_HOST}/pdfHistory/${
             response.payload.fileName
