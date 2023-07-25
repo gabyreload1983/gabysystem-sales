@@ -21,6 +21,8 @@ export default function OrderDetail() {
   const { user, logoutUserContext } = useContext(UserContext);
   const { id } = useParams();
   const [order, setOrder] = useState(null);
+  const [cancelButton, setCancelButton] = useState(true);
+  const [confirmButton, setConfirmButton] = useState(true);
 
   const navigate = useNavigate();
 
@@ -44,7 +46,45 @@ export default function OrderDetail() {
     }
   };
 
-  const handleAddingProduct = (product) => {
+  const handleAddingProduct = async (product) => {
+    let serie = "";
+    if (product.trabaserie === "S") {
+      const { value } = await Swal.fire({
+        input: "text",
+        inputLabel: "Ingrese Nº Serie",
+        inputPlaceholder: "Numero de Serie",
+        showCancelButton: true,
+      });
+
+      if (!value) {
+        return;
+      }
+
+      const response = await getFromApi(
+        `http://${import.meta.env.VITE_URL_HOST}/api/products/serie/${value}`
+      );
+      if (response.status === "error" && response.message === "jwt-expired") {
+        await SwalError(response);
+        logoutUserContext();
+        return navigate("/login");
+      }
+
+      if (response.status === "error") {
+        return await SwalError(response);
+      }
+
+      if (response.status === "success") {
+        if (response.payload.length) {
+          const productFind = response.payload[0];
+          if (product.codigo !== productFind.codigo)
+            return await SwalError({
+              message: `El serie pertenece al producto ${productFind.codigo}`,
+            });
+        }
+      }
+      serie = value;
+    }
+    product.serie = serie;
     order.products.push(product);
     order.total = getTotalOrder(order);
 
@@ -53,6 +93,9 @@ export default function OrderDetail() {
       products: order.products,
       total: order.total,
     }));
+
+    setCancelButton(false);
+    setConfirmButton(false);
   };
 
   const handleDeletingProduct = (product) => {
@@ -65,38 +108,115 @@ export default function OrderDetail() {
       products: order.products,
       total: order.total,
     }));
-  };
 
-  const handlePrint = async () => {
-    await Swal.fire({
-      toast: true,
-      icon: "success",
-      text: `Falta Implementacion`,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener("mouseenter", Swal.stopTimer);
-        toast.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    });
+    setCancelButton(false);
+    setConfirmButton(false);
   };
 
   const handleConfirm = async () => {
-    await Swal.fire({
-      toast: true,
-      icon: "success",
-      text: `Falta Implementacion`,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener("mouseenter", Swal.stopTimer);
-        toast.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    });
+    try {
+      const question = await Swal.fire({
+        text: `Guardar cambios en orden ${order.nrocompro}?`,
+        showCancelButton: true,
+        confirmButtonText: "Aceptar",
+      });
+      if (!question.isConfirmed) return;
+      Swal.fire({
+        title: "Wait...",
+        html: "<strong>Actualizando orden y enviando email</strong>",
+        timerProgressBar: true,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+      const response = await putToApi(
+        `http://${import.meta.env.VITE_URL_HOST}/api/orders/products`,
+        order
+      );
+
+      if (response.status === "success") {
+        setCancelButton(true);
+        setConfirmButton(true);
+        getOrder();
+        if (!order.products.length) {
+          return await Swal.fire({
+            icon: "success",
+            text: `Cambios guardados con exito! Orden sin productos`,
+            position: "center",
+            showConfirmButton: true,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+              toast.addEventListener("mouseenter", Swal.stopTimer);
+              toast.addEventListener("mouseleave", Swal.resumeTimer);
+            },
+          });
+        }
+
+        await Swal.fire({
+          icon: "success",
+          text: `Cambios guardados con exito!`,
+          position: "center",
+          showConfirmButton: true,
+          confirmButtonText: "Abrir PDF",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+
+        window.open(
+          `http://${import.meta.env.VITE_URL_HOST}/pdfHistory/${
+            response.payload.fileName
+          }`,
+          "_blank"
+        );
+      }
+      if (response.status === "error") {
+        await Swal.fire({
+          toast: true,
+          icon: "error",
+          text: `${response.message}`,
+          position: "top-end",
+          timer: 3000,
+          showConfirmButton: false,
+          timerProgressBar: true,
+          didOpen: (toast) => {
+            toast.addEventListener("mouseenter", Swal.stopTimer);
+            toast.addEventListener("mouseleave", Swal.resumeTimer);
+          },
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        text: `${error.message}`,
+        icon: "error",
+      });
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      const question = await Swal.fire({
+        text: `Cancelar cambios en orden ${order.nrocompro}?`,
+        showCancelButton: true,
+        confirmButtonText: "Aceptar",
+      });
+      if (!question.isConfirmed) return;
+
+      getOrder();
+      setCancelButton(true);
+      setConfirmButton(true);
+    } catch (error) {
+      Swal.fire({
+        text: `${error.message}`,
+        icon: "error",
+      });
+    }
   };
 
   const outOrder = async (id) => {
@@ -266,23 +386,19 @@ export default function OrderDetail() {
             </Col>
             {order.estado === 22 && (
               <Col xs={12} className="d-flex justify-content-between mb-3">
-                <button
-                  className="btn btn-sm btn-outline-warning"
-                  onClick={handlePrint}
-                >
-                  Imprimir
-                </button>
                 <div className="btn-group">
                   <button
                     className="btn btn-sm btn-outline-success"
                     onClick={handleConfirm}
+                    disabled={confirmButton}
                   >
                     Confirmar
                   </button>
 
                   <button
                     className="btn btn-sm btn-outline-danger"
-                    onClick={getOrder}
+                    onClick={handleCancel}
+                    disabled={cancelButton}
                   >
                     Cancelar
                   </button>
