@@ -90,22 +90,6 @@ export default function OrderDetail() {
     setConfirmButton(false);
   };
 
-  const handlePrint = async () => {
-    await Swal.fire({
-      toast: true,
-      icon: "success",
-      text: `Falta Implementacion`,
-      position: "top-end",
-      timer: 3000,
-      showConfirmButton: false,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener("mouseenter", Swal.stopTimer);
-        toast.addEventListener("mouseleave", Swal.resumeTimer);
-      },
-    });
-  };
-
   const handleConfirm = async () => {
     try {
       const question = await Swal.fire({
@@ -379,12 +363,6 @@ export default function OrderDetail() {
             </Col>
             {order.estado === 22 && (
               <Col xs={12} className="d-flex justify-content-between mb-3">
-                <button
-                  className="btn btn-sm btn-outline-warning"
-                  onClick={handlePrint}
-                >
-                  Imprimir
-                </button>
                 <div className="btn-group">
                   <button
                     className="btn btn-sm btn-outline-success"
