@@ -59,6 +59,29 @@ export default function OrderDetail() {
       if (!value) {
         return;
       }
+
+      const response = await getFromApi(
+        `http://${import.meta.env.VITE_URL_HOST}/api/products/serie/${value}`
+      );
+      if (response.status === "error" && response.message === "jwt-expired") {
+        await SwalError(response);
+        logoutUserContext();
+        return navigate("/login");
+      }
+
+      if (response.status === "error") {
+        return await SwalError(response);
+      }
+
+      if (response.status === "success") {
+        if (response.payload.length) {
+          const productFind = response.payload[0];
+          if (product.codigo !== productFind.codigo)
+            return await SwalError({
+              message: `El serie pertenece al producto ${productFind.codigo}`,
+            });
+        }
+      }
       serie = value;
     }
     product.serie = serie;
