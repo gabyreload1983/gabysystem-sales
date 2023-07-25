@@ -131,10 +131,11 @@ export default function OrderDetail() {
       );
 
       if (response.status === "success") {
+        setCancelButton(true);
+        setConfirmButton(true);
         getOrder();
         if (!order.products.length) {
           return await Swal.fire({
-            toast: true,
             icon: "success",
             text: `Cambios guardados con exito! Orden sin productos`,
             position: "center",
@@ -148,12 +149,13 @@ export default function OrderDetail() {
         }
 
         await Swal.fire({
-          toast: true,
           icon: "success",
           text: `Cambios guardados con exito!`,
           position: "center",
           showConfirmButton: true,
           confirmButtonText: "Abrir PDF",
+          allowOutsideClick: false,
+          allowEscapeKey: false,
           didOpen: (toast) => {
             toast.addEventListener("mouseenter", Swal.stopTimer);
             toast.addEventListener("mouseleave", Swal.resumeTimer);
