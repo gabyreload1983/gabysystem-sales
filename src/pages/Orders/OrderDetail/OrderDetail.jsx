@@ -8,6 +8,7 @@ import Table from "react-bootstrap/Table";
 import { SwalError, getFromApi, getTotalOrder, putToApi } from "../../../utils";
 import Swal from "sweetalert2";
 import {
+  formatSerialNumber,
   getOrderDiagnosis,
   getOrderState,
   getOrderTier,
@@ -49,7 +50,7 @@ export default function OrderDetail() {
   const handleAddingProduct = async (product) => {
     let serie = "";
     if (product.trabaserie === "S") {
-      const { value } = await Swal.fire({
+      let { value } = await Swal.fire({
         input: "text",
         inputLabel: "Ingrese Nº Serie",
         inputPlaceholder: "Numero de Serie",
@@ -59,6 +60,8 @@ export default function OrderDetail() {
       if (!value) {
         return;
       }
+
+      value = formatSerialNumber(value);
 
       const response = await getFromApi(
         `http://${import.meta.env.VITE_URL_HOST}/api/products/serie/${value}`
