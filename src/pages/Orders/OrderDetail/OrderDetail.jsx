@@ -102,7 +102,9 @@ export default function OrderDetail() {
   };
 
   const handleDeletingProduct = (product) => {
-    const index = order.products.findIndex((p) => p.codigo === product.codigo);
+    const index = order.products.findIndex(
+      (p) => p.codigo === product.codigo && p.serie === product.serie
+    );
     order.products.splice(index, 1);
     order.total = getTotalOrder(order);
 
